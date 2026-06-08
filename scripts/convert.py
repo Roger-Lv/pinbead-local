@@ -331,6 +331,31 @@ def main():
     pattern.save(out_dir / f"{args.name}_pattern.png", optimize=True)
 
     n_colors = len(counter)
+
+    # 写 stats.txt (人类可读总览: 全部色号 + 颗数 + 占比 + 条形图)
+    max_cnt = bom_rows[0][1] if bom_rows else 0
+    bar_w = 24
+    stats_lines = [
+        f"拼豆统计 - {args.name}",
+        f"输入: {Path(args.image).name}",
+        f"网格: {gw}×{gh} = {gw*gh} 格 | 豆 {bead_count} 颗 | 背景留空 {bg_count} 格",
+        f"色数: {n_colors} 种 (Mard 221)",
+        "",
+        f"{'色号':<5} {'名称':<10} {'颗数':>5} {'占比':>6}  条形图",
+        "-" * 64,
+    ]
+    for code, cnt in bom_rows:
+        p = next(x for x in palette if x["code"] == code)
+        pct = cnt / bead_count * 100 if bead_count else 0
+        bar_len = int(round(cnt / max_cnt * bar_w)) if max_cnt else 0
+        bar = "█" * bar_len
+        stats_lines.append(
+            f"{code:<5} {p['name_zh']:<10} {cnt:>5} {pct:>5.1f}%  {bar}"
+        )
+    stats_lines.append("-" * 64)
+    stats_lines.append(f"{'合计':<5} {'':<10} {bead_count:>5} {'100.0%':>6}")
+    (out_dir / f"{args.name}_stats.txt").write_text("\n".join(stats_lines) + "\n", encoding="utf-8")
+
     print(f"[pinbead-local] 输入: {Path(args.image).name} ({crop_msg})")
     print(f"[pinbead-local] 网格: {gw}×{gh} = {gw*gh} 格 ({bead_count} 颗豆, {bg_count} 背景留空)")
     print(f"[pinbead-local] 颜色: {n_colors} 种 (Mard 221)")
@@ -338,6 +363,7 @@ def main():
     print(f"   - {out_dir / (args.name + '_pattern.png')}")
     print(f"   - {out_dir / (args.name + '_grid.json')}")
     print(f"   - {out_dir / (args.name + '_bom.csv')}")
+    print(f"   - {out_dir / (args.name + '_stats.txt')}")
     if n_colors:
         print(f"[pinbead-local] TOP 5: {', '.join(f'{c}×{n}' for c, n in bom_rows[:5])}")
 
