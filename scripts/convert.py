@@ -289,7 +289,7 @@ def main():
                 if code is None or code in top:
                     continue
                 orig_p = next(p for p in palette if p["code"] == code)
-                orig_lab = skcolor.rgb2lab(orig_p["rgb"].astype(np.float64).reshape(1, 1, 3) / 255.0).reshape(3)
+                orig_lab = skcolor.rgb2lab(orig_p["rgb"].astype(np.float64).reshape(1, 1, 3) / 255.0).reshape(1, 3)
                 dE = skcolor.deltaE_ciede2000(top_lab, orig_lab)
                 codes_grid[r][c] = top_palette[int(np.argmin(dE))]["code"]
 
